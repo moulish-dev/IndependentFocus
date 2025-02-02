@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InFocus</title>
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box; font-family: '', sans-serif;
+        }
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; background: linear-gradient(135deg, #f5f7fa, #db11fb); color: #333;
+            transition: background 0.3s ease-in-out;
+        }
+        .container {
+            width: 90%; max-width: 1000px; background: white; padding: 25px;
+            border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            text-align: center; transition: background 0.3s ease-in-out;
+        }
+        .header {
+            font-size: 28px; font-weight: bold; margin-bottom: 20px; 
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .task-form {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px;
+        }
+        .task-form input, .task-form button {
+            padding: 12px; border-radius: 5px; font-size: 15px; border: 1px solid #ccc;
+        }
+        .task-form input { width: 40%; }
+        .task-form button {
+            background: linear-gradient(45deg, #e52e71, #6a79ff); color: white; font-weight: bold;
+            cursor: pointer; border: none; transition: transform 0.3s ease, background 0.3s;
+            padding: 12px 15px;
+        }
+        .task-form button:hover { transform: scale(1.05); }
+        .calendar-board {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px;
+            background: white; padding: 10px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        .day {
+            background: linear-gradient(120deg,#2d4af3, #8fd3f4);
+            padding: 15px; border-radius: 10px; min-height: 150px; 
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;
+            font-size: 16px; font-weight: bold; text-align: center; color: white;
+        }
+        .day:hover { transform: scale(1.05); background: #co67fd; }
+        .subtask {
+            background: rgba(255, 255, 255, 0.9); padding: 10px; margin-top: 5px; border-radius: 5px;
+            font-size: 14px; font-weight: bold; transition: all 0.5s ease-in-out;
+            opacity: 0; transform: translateY(10px); text-align: left;
+        }
+        .loading {
+            display: none; font-size: 15px; color: #e52e71; margin-top: 10px;
+            font-weight: bold; font-style: italic;
+        }
+        .progress-bar {
+            width: 100%; height: 6px; background: #ccc; border-radius: 6px;
+            margin-top: 5px; display: none; overflow: hidden;
+        }
+        .progress-bar div {
+            width: 0; height: 6px; background: linear-gradient(90deg, #ff8a00, #e52e71);
+            border-radius: 6px; transition: width 5s ease-in-out;
+        }
+        .dark-mode {
+            background: #121212; color: white;
+        }
+        .dark-mode .container {
+            background: #2c2c2c; color: white;
+        }
+        .dark-mode .day {
+            background: #555;
+        }
+        .dark-mode .task-form input, .dark-mode .task-form button {
+            background: #444; color: white; border: 1px solid #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">🚀In Focus AI</div>
+        
+        <p><strong>Example   Tasks:</strong> "Write a research paper", "Build a website", "Prepare for a coding interview"</p>
+        <br>
+        <form class="task-form" onsubmit="generateSubtasks(event)">
+            <input type="text" id="task-input" placeholder="Enter your task" required>
+            <input type="date" id="task-date" required>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <div class="loading">⏳ Generating Tasks</div>
+        <div class="progress-bar"><div></div></div>
+
+        <div class="calendar-board">
+            <div class="day" id="Monday">Monday</div>
+            <div class="day" id="Tuesday">Tuesday</div>
+            <div class="day" id="Wednesday">Wednesday</div>
+            <div class="day" id="Thursday">Thursday</div>
+            <div class="day" id="Friday">Friday</div>
+            <div class="day" id="Saturday">Saturday</div>
+            <div class="day" id="Sunday">Sunday</div>
+        </div>
+        <br><br> <em>Powered by Gemini 1.5 Flash API </em>
+        <br><em>The user's patterns will also be recorded so that tasks can be allotted based on it.</em>
+    </div>
+
+    <script>
+        function generateSubtasks(event) {
+            event.preventDefault();
+
+            let taskInput = document.getElementById('task-input').value.trim().toLowerCase();
+            let taskDate = new Date(document.getElementById('task-date').value);
+            let loading = document.querySelector('.loading');
+            let progressBar = document.querySelector('.progress-bar div');
+            let dayIndex = taskDate.getDay();
+            let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            document.querySelectorAll('.day').forEach(day => day.innerHTML = `<strong>${day.id}</strong>`);
+
+            let subtasks = [
+                ["Research 📖", "Outline Key Points ✏️"],
+                ["Draft Initial Version 📝", "Get Feedback 🗣️"],
+                ["Edit & Improve 🔍", "Format Correctly 📑"],
+                ["Finalize Work ✅", "Double-Check Mistakes ❌"],
+                ["Prepare for Submission 📤", "Submit & Celebrate 🎉"]
+            ];
+
+            loading.style.display = "block";
+            document.querySelector('.progress-bar').style.display = "block";
+            progressBar.style.width = "100%";
+
+            setTimeout(() => {
+                loading.style.display = "none";
+
+                subtasks.forEach((subtaskGroup, index) => {
+                    let dayName = days[(dayIndex + index) % 7];
+                    subtaskGroup.forEach(subtask => {
+                        let subtaskElement = document.createElement('div');
+                        subtaskElement.classList.add('subtask');
+                        subtaskElement.style.color = `black`
+                        subtaskElement.style.background = `hsl(${Math.random() * 180}, 80%, 80%)`; // Random color
+                        subtaskElement.innerHTML = `<strong>${subtask}</strong>`;
+                        document.getElementById(dayName).appendChild(subtaskElement);
+                        setTimeout(() => { subtaskElement.style.opacity = "1"; subtaskElement.style.transform = "translateY(0)"; }, index * 300);
+                    });
+                });
+
+            }, 5000);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+    </script>
+
+</body>
+</html>
